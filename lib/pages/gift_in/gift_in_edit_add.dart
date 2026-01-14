@@ -1,292 +1,245 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:my_wallet/models/gift_in_event.dart';
-import 'package:my_wallet/models/person.dart';
-import 'package:my_wallet/providers/gift_in_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:my_wallet/models/relation.dart';
-import 'package:my_wallet/models/git_in_detail.dart';
 
-class GiftInEditAddPersonPage extends StatefulWidget {
-  // When saved, this page will Navigator.pop(context, Map<String, dynamic> event)
-  // bool isEdit = false;
-  const GiftInEditAddPersonPage({super.key});
+class GiftInEditPage extends StatefulWidget {
+  const GiftInEditPage({super.key});
 
   @override
-  _GiftInEditAddPersonPageState createState() => _GiftInEditAddPersonPageState();
+  State<GiftInEditPage> createState() => _GiftInEditPageState();
 }
 
-class _GiftInEditAddPersonPageState extends State<GiftInEditAddPersonPage> {
-  final _formKey = GlobalKey<FormState>();
+class _GiftInEditPageState extends State<GiftInEditPage> {
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _guestRemarkController = TextEditingController();
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _giftAmountController = TextEditingController();
-  final TextEditingController _costAmountController = TextEditingController();
-  final TextEditingController _remarkController = TextEditingController();
+  final _amountController = TextEditingController();
+  final _giftController = TextEditingController();
+  final _giftRemarkController = TextEditingController();
 
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _giftAmountController.dispose();
-    _giftController.dispose();
-    _remarkController.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final name = _nameController.text.trim();
-    final giftAmount = int.tryParse(_totalAmountController.text.trim()) ?? 0;
-    final costAmount = int.tryParse(_costAmountController.text.trim()) ?? 0;
-    final remark = _remarkController.text.trim().isEmpty ? null : _remarkController.text.trim();
-
-    final person = Person(
-      name: name,
-      relation: context.read<GiftInProvider>().selectedRelationIdForAdd,
-      remark: remark,
-      // 'created_at' can be set by DB; include if desired:
-      // 'created_at': DateTime.now().toIso8601String(),
-    );
-    final giftInDetail = GiftInDetail(
-      eventId: context.read<GiftInProvider>().selectedEvent!.id!,
-      personId: -3,
-      amount: giftAmount,
-      personName: name,
-      relation: '',
-      remark: remark,
-    );
-    final result = context.read<GiftInProvider>().addSinglePerson(person, giftInDetail);
-    if (result == -2) {
-      // Name already exists
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('该姓名已存在，请修改后重试')),
-      );
-      return;
-    }
-    Navigator.of(context).pop(person);
-  }
+  String? _relation;
+  final _relations = ['亲戚', '朋友', '同事', '同学', '其他'];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final provider = context.watch<GiftInProvider>();
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: const Color(0xFFF6F7F9),
       appBar: AppBar(
-        title: const Text(
-          '新增入礼事件',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
+        title: const Text('新增入礼'),
         centerTitle: false,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0.5,
       ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+        child: Column(
+          children: [
+            _buildGuestCard(),
+            const SizedBox(height: 12),
+            _buildGiftCard(),
+          ],
+        ),
+      ),
+      bottomSheet: _buildBottomBar(),
+    );
+  }
+
+  /// ================= 宾客信息 =================
+  Widget _buildGuestCard() {
+    return _buildCard(
+      title: '宾客信息',
+      child: Column(
+        children: [
+          Row(
             children: [
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildField(
-                        controller: _nameController,
-                        label: '姓名 *',
-                        hint: '例如：张三',
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? '请填写姓名' : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      _buildRelationSelector(text: provider.selectedRelationForAdd ?? '请选择关系', onTap: () => _showRelationSelector(context, provider)),
-                      const SizedBox(height: 16),
-
-                      _buildDateField(),
-                      const SizedBox(height: 16),
-
-                      _buildNumberField(
-                        controller: _totalAmountController,
-                        label: '总额',
-                        hint: '收到礼金（元）',
-                      ),
-                      const SizedBox(height: 16),
-
-                      _buildNumberField(
-                        controller: _costAmountController,
-                        label: '成本',
-                        hint: '随礼或成本（元）',
-                      ),
-                      const SizedBox(height: 16),
-
-                      _buildField(
-                        controller: _remarkController,
-                        label: '备注',
-                        hint: '可填写关系、备注信息',
-                        maxLines: 3,
-                      ),
-                    ],
-                  ),
+              Expanded(
+                child: _input(
+                  controller: _nameController,
+                  label: '姓名 *',
                 ),
               ),
-
-              const SizedBox(height: 24),
-
-              // 保存按钮
-              FilledButton.icon(
-                onPressed: _save,
-                icon: const Icon(Icons.save),
-                label: const Text(
-                  '保存并返回',
-                  style: TextStyle(fontSize: 16),
-                ),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _dropdown(
+                  label: '关系',
+                  value: _relation,
+                  items: _relations,
+                  onChanged: (v) => setState(() => _relation = v),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          _input(
+            controller: _phoneController,
+            label: '电话',
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 12),
+          _textarea(
+            controller: _guestRemarkController,
+            label: '宾客备注',
+            hint: '例如：同村亲戚',
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
+  /// ================= 礼物信息 =================
+  Widget _buildGiftCard() {
+    return _buildCard(
+      title: '礼物信息',
+      child: Column(
+        children: [
+          _moneyInput(),
+          const SizedBox(height: 12),
+          _input(
+            controller: _giftController,
+            label: '礼品',
+            hint: '如：烟酒、水果',
+          ),
+          const SizedBox(height: 12),
+          _textarea(
+            controller: _giftRemarkController,
+            label: '礼物备注',
+            hint: '请输入备注信息',
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildNumberField({
+  /// ================= 通用组件 =================
+  Widget _buildCard({required String title, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _input({
     required TextEditingController controller,
     required String label,
     String? hint,
+    TextInputType? keyboardType,
   }) {
-    return TextFormField(
+    return TextField(
       controller: controller,
+      keyboardType: keyboardType,
+      decoration: _decoration(label, hint: hint),
+    );
+  }
+
+  Widget _textarea({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: 3,
+      maxLength: 100,
+      decoration: _decoration(label, hint: hint),
+    );
+  }
+
+  Widget _dropdown({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: _decoration(label),
+      items: items
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(e),
+            ),
+          )
+          .toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _moneyInput() {
+    return TextField(
+      controller: _amountController,
       keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
+      decoration: _decoration('礼金').copyWith(
+        prefixText: '¥ ',
       ),
-      validator: (v) {
-        if (v == null || v.trim().isEmpty) return null;
-        final n = int.tryParse(v.trim());
-        if (n == null) return '请输入有效整数';
-        if (n < 0) return '不能为负数';
-        return null;
-      },
     );
   }
 
-  Widget _buildDateField() {
-    return TextFormField(
-      controller: _dateController,
-      readOnly: true,
-      onTap: _pickDate,
-      decoration: InputDecoration(
-        labelText: '日期 *',
-        filled: true,
-        suffixIcon: Icon(Icons.calendar_month),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
+  InputDecoration _decoration(String label, {String? hint}) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFFF8F9FB),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
-      validator: (v) =>
-          v == null || v.trim().isEmpty ? '请选择日期' : null,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
     );
   }
 
-  Widget _buildRelationSelector({
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(24),
-      onTap: onTap,
+  /// ================= 底部保存 =================
+  Widget _buildBottomBar() {
+    return SafeArea(
       child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade300),
-          color: Colors.white,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(text),
-            const SizedBox(width: 8),
-            const Icon(Icons.filter_list),
-            // const Icon(Icons.keyboard_arrow_down, size: 20),
-          ],
+        padding: const EdgeInsets.all(16),
+        color: Colors.white,
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFC107),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            onPressed: _onSave,
+            child: const Text(
+              '保存',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  void _showRelationSelector(
-    BuildContext context,
-    GiftInProvider provider,
-  ) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ListView(
-            shrinkWrap: true,
-            children: provider.oriRelations.map((e) {
-              return ListTile(
-                title: Text(e.name),
-                onTap: () {
-                  provider.setSelectRelationForAdd(e.name, e.id);
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+  void _onSave() {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请输入姓名')));
+      return;
+    }
+
+    // TODO：这里接 Provider / 数据库保存
+    Navigator.pop(context);
   }
-
 }
-

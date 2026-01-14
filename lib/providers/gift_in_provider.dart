@@ -125,19 +125,4 @@ class GiftInProvider extends ChangeNotifier {
     selectedRelationIdForAdd = relationId;
     notifyListeners();
   }
-
-  /// 添加单个宾客
-  Future<int> addSinglePerson(Person person, GiftInDetail giftInDetail) async {
-    int personId = await _db.updateInsertPerson(person);
-    if (personId == -2) {
-      // Name already exists
-      return -2;
-    }
-
-    int detailId = await _db.updateInsertGiftInDetail(giftInDetail, personId);
-    _applyFilter();
-    return 0;
-  }
-  // 
-
 }

@@ -210,7 +210,7 @@ void _showAddSelector(BuildContext context, GiftInProvider provider) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => GiftInEditAddPersonPage(),
+                    builder: (_) => GiftInEditPage(),
                   ),
                 );
               },

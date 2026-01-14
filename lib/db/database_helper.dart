@@ -118,55 +118,6 @@ class DatabaseHelper {
     );
   }
 
-  /// 插入或更新 Person
-Future<int> updateInsertPerson(Person person) async {
-  final db = await database;
-
-  if (person.id == null) {
-    final existingPersonName = await db.query('person', where: 'name = ?', whereArgs: [person.name]);
-    if (existingPersonName.isNotEmpty) {
-      return -2; // Name already exists
-    }
-    return await db.insert('person', person.toMap());
-  } else {
-    await db.update(
-      'person',
-      person.toMap(),
-      where: 'id = ?',
-      whereArgs: [person.id],
-    );
-    return person.id!;
-  }
-}
-
-/// 插入或更新 GiftInDetail
-Future<int> updateInsertGiftInDetail(GiftInDetail detail, int personId) async {
-  final db = await database;
-
-  if (detail.id == null) {
-    GiftInDetail detailWithPersonId = GiftInDetail(
-    id: detail.id,
-    eventId: detail.eventId,
-    personId: personId,
-    amount: detail.amount,
-    gift: detail.gift,
-    remark: detail.remark,
-    createdAt: detail.createdAt,
-  );
-    return await db.insert('gift_in_detail', detailWithPersonId.toMap());
-  } else {
-    await db.update(
-      'gift_in_detail',
-      detail.toMap(),
-      where: 'id = ?',
-      whereArgs: [detail.id],
-    );
-    return detail.id!;
-  }
-}
-
-
-
 
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

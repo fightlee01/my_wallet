@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'providers/person_provider.dart';
 import 'providers/gift_out_provider.dart';
 // import 'providers/gift_in_provider.dart';
-import 'providers/gift_in_edit_provider.dart';
 import 'providers/relation_provider.dart';
 import 'db/database_helper.dart';
 // import 'pages/gift_out/gift_out_add_page.dart';
