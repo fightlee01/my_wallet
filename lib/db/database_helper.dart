@@ -4,6 +4,7 @@ import 'package:my_wallet/models/git_in_detail.dart';
 import 'package:my_wallet/models/gift_in_event.dart';
 import 'package:my_wallet/models/relation.dart';
 import 'package:my_wallet/models/person.dart';
+import 'package:my_wallet/constants/error_codes.dart';
 
 class DatabaseHelper {
   static const _dbName = 'gift_book.db';
@@ -39,6 +40,10 @@ class DatabaseHelper {
     await db.execute(_createGiftInEventTable);
     /// 创建收礼明细表
     await db.execute(_createGiftInDetailTable);
+    // 创建送礼事件表
+    await db.execute(_createGiftOutEventTable);
+    // 创建送礼明细表
+    await db.execute(_createGiftOutDetailTable);
     /// 创建关系表
     await db.execute(_createRelationTable);
     /// 插入默认关系数据
@@ -58,7 +63,10 @@ class DatabaseHelper {
       SELECT 
         d.*,
         p.name AS person_name,
-        r.name AS relation
+        r.name AS relation,
+        r.id AS relation_id,
+        p.phone AS phone,
+        p.remark AS person_remark
       FROM gift_in_detail d
       JOIN person p ON d.person_id = p.id
       LEFT JOIN relation r ON p.relation = r.id
@@ -117,6 +125,79 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+  // 插入人员，返回新插入的人员 ID
+  Future<int> insertPerson(Map<String, dynamic> person) async {
+    final db = await database;
+    // 加入异常处理以防重复插入和其他数据库错误
+    try {
+      final List<Map<String, Object?>> existingPersons = await db.query('person', where: 'name = ?', whereArgs: [person['name']]);
+      if (existingPersons.isNotEmpty) {
+        return existingPersons.first['id'] as int;
+      }
+    } catch (e) {
+      // 处理其他数据库错误
+      print(e.toString());
+      return DBErrorCodes.personInsertError;
+    }
+    // 正常插入
+    return await db.insert(
+      'person',
+      person,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // 删除入礼详情
+  Future<int> deleteGiftInDetail(int detailId) async {
+    final db = await database;
+    int result = await db.delete(
+      'gift_in_detail',
+      where: 'id = ?',
+      whereArgs: [detailId],
+    );
+    return result;
+  }
+
+  // 更新人员信息
+  Future<int> updatePerson(int personId, Map<String, dynamic> changePerson) async {
+    final db = await database;
+    return await db.update(
+      'person',
+      changePerson,
+      where: 'id = ?',
+      whereArgs: [personId],
+    );
+  }
+  // 新增入礼详情
+  Future<int> insertGiftInDetail(Map<String, dynamic> detail, int? eventId, int personId) async {
+    final db = await database;
+    final List<Map<String, Object?>> existingDetails = await db.query('gift_in_detail', where: 'event_id = ? AND person_id = ?', whereArgs: [eventId, personId]);
+    if (existingDetails.isNotEmpty) {
+      return DBErrorCodes.detailExists;
+    }
+    try {
+      // 其他可能的数据库错误处理
+      return await db.insert(
+        'gift_in_detail',
+        detail,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      print(e.toString());
+      return DBErrorCodes.detailInsertError;
+    }
+  }
+  // 更新入礼详情
+  Future<int> updateGiftInDetail(int detailId, Map<String, dynamic> changeDetail) async {
+    final db = await database;
+    return await db.update(
+      'gift_in_detail',
+      changeDetail,
+      where: 'id = ?',
+      whereArgs: [detailId],
+    );
+  }
+
 
 
 
@@ -125,7 +206,7 @@ class DatabaseHelper {
   }
 
   /// ================== 建表 SQL ==================
-
+  // 人员表
   static const String _createPersonTable = '''
   CREATE TABLE person (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -136,6 +217,7 @@ class DatabaseHelper {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
   ''';
+  // 收礼明细表
   static const String _createGiftInDetailTable = '''
   CREATE TABLE gift_in_detail (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,6 +231,7 @@ class DatabaseHelper {
     FOREIGN KEY (person_id) REFERENCES person(id)
   );
   ''';
+  // 收礼事件表
   static const String _createGiftInEventTable = '''
   CREATE TABLE gift_in_event (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -161,6 +244,32 @@ class DatabaseHelper {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
   ''';
+  // 送礼事件表
+  static const String _createGiftOutEventTable = '''
+  CREATE TABLE gift_out_event (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,              -- 事件：结婚 / 满月酒 / 乔迁
+    event_date TEXT NOT NULL,         -- 送礼日期
+    location TEXT,                    -- 地点
+    remark TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+  ''';
+  // 送礼明细表
+  static const String _createGiftOutDetailTable = '''
+  CREATE TABLE gift_out_detail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    person_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,           -- 礼金
+    gift TEXT,                         -- 礼品
+    remark TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES gift_out_event(id),
+    FOREIGN KEY (person_id) REFERENCES person(id)
+  );
+  ''';
+  // 关系表
   static const String _createRelationTable = '''
   CREATE TABLE relation (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

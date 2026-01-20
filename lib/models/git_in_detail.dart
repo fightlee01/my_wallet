@@ -10,6 +10,10 @@ class GiftInDetail {
   /// UI 常用冗余字段（非数据库字段）
   final String personName;
   final String? relation;
+  final int? relationId;
+  final String? phone;
+  final String? personRemark;
+
 
   GiftInDetail({
     this.id,
@@ -21,6 +25,9 @@ class GiftInDetail {
     this.createdAt,
     required this.personName,
     required this.relation,
+    this.relationId,
+    this.phone,
+    this.personRemark,
   });
 
   factory GiftInDetail.fromMap(Map<String, dynamic> map) {
@@ -34,6 +41,9 @@ class GiftInDetail {
       createdAt: map['created_at'] as String?,
       personName: map['person_name'] as String,
       relation: map['relation'] as String?,
+      relationId: map['relation_id'] as int?,
+      phone: map['phone'] as String?,
+      personRemark: map['person_remark'] as String?,
     );
   }
 
@@ -46,6 +56,11 @@ class GiftInDetail {
       'gift': gift,
       'remark': remark,
       'created_at': createdAt,
+      'person_name': personName,
+      'relation': relation,
+      'relation_id': relationId,
+      'phone': phone,
+      'person_remark': personRemark,
     };
   }
 
@@ -59,6 +74,9 @@ class GiftInDetail {
     String? createdAt,
     String? personName,
     String? relation,
+    int? relationId,
+    String? phone,
+    String? personRemark,
   }) {
     return GiftInDetail(
       id: id ?? this.id,
@@ -70,8 +88,10 @@ class GiftInDetail {
       createdAt: createdAt ?? this.createdAt,
       personName: personName ?? this.personName,
       relation: relation ?? this.relation,
+      relationId: relationId ?? this.relationId,
+      phone: phone ?? this.phone,
+      personRemark: personRemark ?? this.personRemark,
     );
   }
 
-  
 }

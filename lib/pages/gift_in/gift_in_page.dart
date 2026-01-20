@@ -10,6 +10,7 @@ import 'gift_in_search_bar.dart';
 import 'package:my_wallet/providers/gift_in_provider.dart';
 import 'gift_in_add_events.dart';
 import 'gift_in_edit_add.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class GiftInPage extends StatelessWidget {
   const GiftInPage({super.key});
@@ -89,27 +90,31 @@ Widget _buildBody(BuildContext context, GiftInProvider provider) {
           const SizedBox(height: 8),
 
           Expanded(
-            child: ListView.builder(
-              itemCount: provider.filteredDetails.length,
-              itemBuilder: (_, i) {
-                final e = provider.filteredDetails[i];
-                return GiftInGuestItem(
-                  name: e.personName,
-                  relation: e.relation ?? '',
-                  amount: e.amount,
-                  onEdit: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PlaceholderPage('title'),
-                      ),
-                    );
-                  },
-                  avatarColor:
-                      Colors.primaries[i % Colors.primaries.length],
-                );
-              },
-            ),
+            child: SlidableAutoCloseBehavior(
+              child: ListView.builder(
+                itemCount: provider.filteredDetails.length,
+                itemBuilder: (_, i) {
+                  final e = provider.filteredDetails[i];
+                  return GiftInGuestItem(
+                    name: e.personName,
+                    relation: e.relation ?? '',
+                    amount: e.amount,
+                    key: ValueKey(e.id),
+                    onEdit: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => GiftInEditPage(detail: e),
+                        ),
+                      );
+                    },
+                    onDelete: () {provider.deleteGiftInDetail(e.id!);},
+                    avatarColor:
+                        Colors.primaries[i % Colors.primaries.length],
+                  );
+                },
+              ),
+            )
           ),
         ],
       ],

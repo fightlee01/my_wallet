@@ -33,7 +33,7 @@ class GiftInProvider extends ChangeNotifier {
 
   /// 当前添加宾客时选择的关系
   String? selectedRelationForAdd;
-  int? selectedRelationIdForAdd;
+  int? selectedRelationIdForAdd = 0;
 
   /// 初始化
   Future<void> load() async {
@@ -120,9 +120,35 @@ class GiftInProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectRelationForAdd(String relationName, int? relationId) {
-    selectedRelationForAdd = relationName;
-    selectedRelationIdForAdd = relationId;
+  /// 设置添加宾客时的关系
+  void setSelectRelationForAdd(String? r) {
+    final result = oriRelations.firstWhere((element) => element.name == r);
+    selectedRelationForAdd = result.name;
+    selectedRelationIdForAdd = result.id;
     notifyListeners();
   }
+  // 新增宾客信息
+  Future<int> insertPerson(Map<String, dynamic> newPerson) async {
+    return await _db.insertPerson(newPerson);
+  }
+  // 更新宾客信息
+  Future<int> updatePerson(int personId, Map<String, dynamic> changePerson) async {
+    return await _db.updatePerson(personId, changePerson);
+  }
+  // 删除入礼详情
+  Future<int> deleteGiftInDetail(int detailId) async {
+    int result = await _db.deleteGiftInDetail(detailId);
+    allDetails.removeWhere((e) => e.id == detailId);
+    _applyFilter();
+    return result;
+  }
+  // 新增入礼详情
+  Future<int> insertGiftInDetail(Map<String, dynamic> newDetail, int? eventId, int personId) async {
+    return await _db.insertGiftInDetail(newDetail, eventId, personId);
+  }
+  // 更新入礼详情
+  Future<int> updateGiftInDetail(int detailId, Map<String, dynamic> changeDetail) async {
+    return await _db.updateGiftInDetail(detailId, changeDetail);
+  }
+
 }
