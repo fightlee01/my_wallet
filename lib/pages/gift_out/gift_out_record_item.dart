@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class GiftInGuestItem extends StatelessWidget {
+class GiftOutDetailItem extends StatelessWidget {
   final String name;
   final String relation;
   final int amount;
@@ -10,7 +10,7 @@ class GiftInGuestItem extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback onDelete;
 
-  const GiftInGuestItem({
+  const GiftOutDetailItem({
     super.key,
     required this.name,
     required this.relation,
@@ -150,24 +150,43 @@ class GiftInGuestItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  relation,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 13,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      relation,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '结婚',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Text(
-            '+ ¥$amount',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF8B1E1E),
-            ),
-          ),
+          Column(
+            children: [
+              Text(
+                '$amount',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8B1E1E),
+                ),
+              ),
+              Text(
+                '2026-1-10',
+              )
+            ],
+          )
         ],
       ),
     );

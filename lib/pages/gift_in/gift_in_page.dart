@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../placeholder_page.dart';
 import 'gift_in_add_guest.dart';
 import 'selector_row.dart';
 import 'gift_in_guest_item.dart';

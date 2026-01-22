@@ -4,6 +4,7 @@ import 'home_page.dart';
 import 'gift_out/gift_out_add_page.dart';
 import 'gift_in/gift_in_page.dart';
 import 'mine_page.dart';
+import 'package:my_wallet/pages/gift_out/gift_out_page.dart';
 
 class MainTabPage extends StatefulWidget {
   const MainTabPage({super.key});
@@ -18,7 +19,7 @@ class _MainTabPageState extends State<MainTabPage> {
   late final List<Widget> _pages = [
     const HomePage(),
     const GiftInPage(),
-    const GiftOutAddPage(),
+    const GiftOutPage(),
     const MinePage(),
   ];
 

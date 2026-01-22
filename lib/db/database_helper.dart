@@ -1,9 +1,9 @@
+import 'package:my_wallet/models/gift_out_event.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:my_wallet/models/git_in_detail.dart';
 import 'package:my_wallet/models/gift_in_event.dart';
 import 'package:my_wallet/models/relation.dart';
-import 'package:my_wallet/models/person.dart';
 import 'package:my_wallet/constants/error_codes.dart';
 
 class DatabaseHelper {
@@ -198,6 +198,31 @@ class DatabaseHelper {
     );
   }
 
+  // 
+  Future<int> insertGiftOutEvent(Map<String, dynamic> giftOutEvent) async {
+    final db = await database;
+    return await db.insert(
+      'gift_out_event',
+      giftOutEvent,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> deleteEvent(int eventId) async {
+    final db = await database;
+    await db.delete(
+      'gift_out_event',
+      where: 'id = ?',
+      whereArgs: [eventId],
+    );
+  }
+
+  Future<List<GiftOutEvent>> getGiftOutEventAll() async {
+    final db = await database;
+    final res = await db.query('gift_out_event');
+    return res.map(GiftOutEvent.fromMap).toList();
+  }
+
 
 
 
@@ -248,9 +273,7 @@ class DatabaseHelper {
   static const String _createGiftOutEventTable = '''
   CREATE TABLE gift_out_event (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,              -- 事件：结婚 / 满月酒 / 乔迁
-    event_date TEXT NOT NULL,         -- 送礼日期
-    location TEXT,                    -- 地点
+    title TEXT NOT NULL,
     remark TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
@@ -261,8 +284,8 @@ class DatabaseHelper {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_id INTEGER NOT NULL,
     person_id INTEGER NOT NULL,
-    amount INTEGER NOT NULL,           -- 礼金
-    gift TEXT,                         -- 礼品
+    gift_out_amount INTEGER NOT NULL,
+    gift TEXT,
     remark TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES gift_out_event(id),

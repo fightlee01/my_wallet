@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:my_wallet/models/git_in_detail.dart';
-import 'package:my_wallet/models/person.dart';
 import 'package:my_wallet/providers/gift_in_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:my_wallet/constants/error_codes.dart';
 
 class GiftInEditPage extends StatefulWidget {
-  final Person? person;
   final GiftInDetail? detail;
-  const GiftInEditPage({super.key, this.person, this.detail});
+  const GiftInEditPage({super.key, this.detail});
 
   @override
   State<GiftInEditPage> createState() => _GiftInEditPageState();

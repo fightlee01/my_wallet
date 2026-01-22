@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:my_wallet/utils/my_utils.dart';
 
 class GiftInSummaryCard extends StatelessWidget {
   final int total;
