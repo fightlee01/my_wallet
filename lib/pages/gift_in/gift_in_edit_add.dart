@@ -312,6 +312,7 @@ class _GiftInEditPageState extends State<GiftInEditPage> {
       if (changePerson.isNotEmpty) {
         int? result = await provider.updatePerson(widget.detail!.personId, changePerson);
         if (result <= 0) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('更新宾客信息失败')));
           return;
@@ -331,12 +332,14 @@ class _GiftInEditPageState extends State<GiftInEditPage> {
       if (changeDetail.isNotEmpty) {
         int? result = await provider.updateGiftInDetail(widget.detail!.id!, changeDetail);
         if (result <= 0) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('更新入礼详情失败')));
           return;
         }
       }
       provider.selectEvent(provider.selectedEvent!); // 刷新数据
+      if (!mounted) return;
       Navigator.pop(context);
     } else {
       // 新增逻辑
@@ -348,6 +351,7 @@ class _GiftInEditPageState extends State<GiftInEditPage> {
       // 插入宾客信息
       int? personId = await provider.insertPerson(newPerson);
       if (personId == DBErrorCodes.personInsertError) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('插入宾客信息失败')));
         return;
@@ -360,21 +364,21 @@ class _GiftInEditPageState extends State<GiftInEditPage> {
       newGiftInDetail['gift'] = _giftController.text.trim();
       newGiftInDetail['remark'] = _giftRemarkController.text.trim();
       int? detailId = await provider.insertGiftInDetail(newGiftInDetail, provider.selectedEvent!.id, personId);
-      print('personId: $personId, detailId: $detailId');
       if (detailId == DBErrorCodes.detailExists) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('该宾客入礼详情已存在，请修改后重试')));
         return;
       } else if (detailId == DBErrorCodes.detailInsertError) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('插入入礼详情失败')));
         return;
       }
       provider.selectEvent(provider.selectedEvent!); // 刷新数据
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
-
-    // TODO：这里接 Provider / 数据库保存
-    // Navigator.pop(context);
   }
 }

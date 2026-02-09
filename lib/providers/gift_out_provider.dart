@@ -5,6 +5,7 @@ import '../models/gift_out_detail.dart';
 import '../models/gift_out.dart';
 import 'package:my_wallet/lib/common/enums/gift_search_type.dart';
 import 'package:my_wallet/db/database_helper.dart';
+import 'package:my_wallet/models/relation.dart';
 
 class GiftOutProvider extends ChangeNotifier {
   final GiftOutDao _dao = GiftOutDao();
@@ -20,7 +21,6 @@ class GiftOutProvider extends ChangeNotifier {
       giftOutAmount: 100,
       gift: '礼物A',
       remark: '备注A',
-      createdAt: '2024-01-01',
       personName: '张三',
       relation: '朋友',
       relationId: 1,
@@ -35,7 +35,6 @@ class GiftOutProvider extends ChangeNotifier {
       giftOutAmount: 200,
       gift: '礼物B',
       remark: '备注B',
-      createdAt: '2024-01-02',
       personName: '李四',
       relation: '同事',
       relationId: 2,
@@ -51,9 +50,15 @@ class GiftOutProvider extends ChangeNotifier {
 
   final searchController = TextEditingController();
 
+  List<Relation> oriRelations = [];
+  List<String> relations = [];
+
   Future<void> load() async {
     // list = await _dao.getListWithPerson();
     events = await getGiftOutEventAll();
+    oriRelations = await _db.getRelations();
+    print(oriRelations.map((e) => e.name).toList());
+    relations = oriRelations.map((e) => e.name).toList();
     notifyListeners();
   }
 
@@ -79,14 +84,23 @@ class GiftOutProvider extends ChangeNotifier {
     notifyListeners();
     return res;
   }
+  // 删除送礼事件
   Future<void> deleteEvent(int eventId) async {
     await _db.deleteEvent(eventId);
     await loadEvents();
     notifyListeners();
   }
-
+  // 获取所有送礼事件
   Future<List<GiftOutEvent>> getGiftOutEventAll() async {
     events = await _db.getGiftOutEventAll();
     return events;
+  }
+  Future<int> getPersonIdByName(String name) async {
+    return await _db.getPersonIdByName(name);
+  }
+  // 
+  Future<int> insertPerson(Map<String, dynamic> person) async {
+    int res = await _db.insertPerson(person);
+    return res;
   }
 }

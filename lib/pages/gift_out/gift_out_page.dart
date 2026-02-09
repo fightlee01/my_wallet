@@ -8,7 +8,7 @@ import 'package:my_wallet/pages/gift_out/gift_out_search_bar.dart';
 import 'package:my_wallet/lib/common/enums/gift_search_type.dart';
 import 'package:my_wallet/pages/gift_out/gift_out_popupmenuitem.dart';
 import 'package:my_wallet/pages/gift_out/gift_out_manage_event.dart';
-import 'package:my_wallet/pages/gift_out/gift_out_add_page.dart';
+import 'package:my_wallet/pages/gift_out/gift_out_add_record.dart';
 
 class GiftOutPage extends StatelessWidget {
   const GiftOutPage({super.key});
@@ -50,7 +50,7 @@ Widget _buildBody(BuildContext context, GiftOutProvider provider) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const GiftOutAddPage(),
+                    builder: (_) => const GiftOutAddEditPage(),
                   ),
                 );
                 break;

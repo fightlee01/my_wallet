@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'home_page.dart';
-import 'gift_out/gift_out_add_page.dart';
+// import 'gift_out/gift_out_add_page.dart';
 import 'gift_in/gift_in_page.dart';
 import 'mine_page.dart';
 import 'package:my_wallet/pages/gift_out/gift_out_page.dart';

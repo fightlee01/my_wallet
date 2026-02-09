@@ -125,6 +125,19 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+  // 根据姓名获取人员 ID
+  Future<int> getPersonIdByName(String name) async {
+    final db = await database;
+    final result = await db.query(
+      'person',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+    if (result.isNotEmpty) {
+      return result.first['id'] as int;
+    }
+    return DBErrorCodes.personNotFound;
+  }
   // 插入人员，返回新插入的人员 ID
   Future<int> insertPerson(Map<String, dynamic> person) async {
     final db = await database;
@@ -198,7 +211,7 @@ class DatabaseHelper {
     );
   }
 
-  // 
+  // 新增送礼事件
   Future<int> insertGiftOutEvent(Map<String, dynamic> giftOutEvent) async {
     final db = await database;
     return await db.insert(
@@ -207,7 +220,7 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-
+  // 删除送礼事件
   Future<void> deleteEvent(int eventId) async {
     final db = await database;
     await db.delete(
@@ -221,6 +234,15 @@ class DatabaseHelper {
     final db = await database;
     final res = await db.query('gift_out_event');
     return res.map(GiftOutEvent.fromMap).toList();
+  }
+
+  Future<int> insertGiftOutDetail(Map<String, dynamic> detail) async {
+    final db = await database;
+    return await db.insert(
+      'gift_out_detail',
+      detail,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
 
@@ -285,6 +307,7 @@ class DatabaseHelper {
     event_id INTEGER NOT NULL,
     person_id INTEGER NOT NULL,
     gift_out_amount INTEGER NOT NULL,
+    gift_out_date TEXT NOT NULL,
     gift TEXT,
     remark TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,

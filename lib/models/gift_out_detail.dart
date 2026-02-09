@@ -5,7 +5,6 @@ class GiftOutDetail {
   final int giftOutAmount;
   final String? gift;
   final String? remark;
-  final String? createdAt;
   final String giftOutDate;
 
   /// UI 常用冗余字段（非数据库字段）
@@ -23,7 +22,6 @@ class GiftOutDetail {
     required this.giftOutAmount,
     this.gift,
     this.remark,
-    this.createdAt,
     required this.personName,
     required this.relation,
     this.relationId,
@@ -40,7 +38,6 @@ class GiftOutDetail {
       giftOutAmount: map['gift_out_amount'] as int,
       gift: map['gift'] as String?,
       remark: map['remark'] as String?,
-      createdAt: map['created_at'] as String?,
       personName: map['person_name'] as String,
       relation: map['relation'] as String?,
       relationId: map['relation_id'] as int?,
@@ -58,7 +55,6 @@ class GiftOutDetail {
       'gift_out_amount': giftOutAmount,
       'gift': gift,
       'remark': remark,
-      'created_at': createdAt,
       'person_name': personName,
       'relation': relation,
       'relation_id': relationId,
@@ -90,7 +86,6 @@ class GiftOutDetail {
       giftOutAmount: giftOutAmount ?? this.giftOutAmount,
       gift: gift ?? this.gift,
       remark: remark ?? this.remark,
-      createdAt: createdAt ?? this.createdAt,
       personName: personName ?? this.personName,
       relation: relation ?? this.relation,
       relationId: relationId ?? this.relationId,
